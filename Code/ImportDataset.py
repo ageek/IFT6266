@@ -28,7 +28,11 @@ class KaggleDataset:
     """
 
     def __init__(self):
+        # Insert the path to the folder containing the kaggle CSV file
         self.datasetPath = "KaggleData/"
+
+    def loadCSV(self):
+        numpy.loadtxt(os.path.join(self.datasetPath, "train.csv"), skiprows=1, dtype='float32')
 
     def loadAsPILimages(self, importOptions=None):
         """
@@ -54,4 +58,6 @@ class KaggleDataset:
 
 if __name__ == "__main__":
     kd = KaggleDataset()
-    kd.loadAsPILimages()
+    images, _, _ = kd.loadAsPILimages()
+    for img in images:
+        img.show()
