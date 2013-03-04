@@ -7,5 +7,5 @@ with open("test_mlp.yaml", "r") as f:
     yamlCode = f.read()
 
 # Training the model
-train = yaml_parse.load(yamlCode)  # Creates the object from the yaml file
+train = yaml_parse.load(yamlCode)  # Creates the Train object from the yaml file
 train.main_loop() # Starts training
