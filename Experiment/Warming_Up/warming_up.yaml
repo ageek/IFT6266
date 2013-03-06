@@ -1,8 +1,3 @@
-# &xxx defines an anchor to xxx and * a reference to that anchor. Exemple : *train will reference &train
-
-# !myclass defines a local datatype. 
-#   Exemple : !obj:pylearn2.train.Train is an Train object in file pylearn2.train.py
-#   So to understand the structure of the file one needs to look at the pylearn2.train.py file
 
 !obj:pylearn2.train.Train {
 
@@ -11,15 +6,15 @@
         base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
         which_set: 'train',
         start: 0, 
-        stop: 3000 # We select only the first 3000 exemples as training set
+        stop: 3500 # We select only the first 3500 exemples as training set
     },
 
-    # Our model will simply be a MLP with a Tanh layer
+    # Our model will simply be a MLP with one Tanh layer
     model: !obj:pylearn2.models.mlp.MLP {
         layers: [
                  !obj:pylearn2.models.mlp.Tanh {
                      layer_name: 'h0',
-                     dim: 1000,
+                     dim: 500,
                      sparse_init: 15
                  },
                  !obj:pylearn2.models.mlp.Softmax {
@@ -31,10 +26,10 @@
         nvis: 2304
     },
 
-    # We use SGD as our training algorithm
-    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
+    # We use BGD as our training algorithm
+    algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
         batch_size: 100,
-        learning_rate: 0.005,
+        line_search_mode: 'exhaustive',
         # What we monitor
         monitoring_dataset:
             {
@@ -42,7 +37,7 @@
                 'valid' : !obj:contest_dataset.ContestDataset {
                               base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
                               which_set: 'train',
-                              start: 3000, # Keep the last 1000 exemples as validation set
+                              start: 3500, # Keep the last 1000 exemples as validation set
                               stop: 4000
                           }
                 # We don't have labels for the public test set
@@ -60,7 +55,7 @@
     extensions: [
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
              channel_name: 'valid_y_misclass',
-             save_path: "test_mlp_results.pkl"
+             save_path: "warming_up_results.pkl"
         },
     ]
 }
