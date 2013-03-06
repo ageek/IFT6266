@@ -7,7 +7,7 @@ from Code.CheckDatasetPath import checkDatasetPath
 checkDatasetPath()
 
 # Import yaml file that specifies the model to train
-with open("test_preprocessor.yaml", "r") as f:
+with open("preprocessing.yaml", "r") as f:
     yamlCode = f.read()
 
 # Training the model
