@@ -1,0 +1,76 @@
+# &xxx defines an anchor to xxx and * a reference to that anchor. Exemple : *train will reference &train
+
+# !myclass defines a local datatype. 
+#   Exemple : !obj:pylearn2.train.Train is an Train object in file pylearn2.train.py
+#   So to understand the structure of the file one needs to look at the pylearn2.train.py file
+
+!obj:pylearn2.train.Train {
+
+    # Our dataset is the contest dataset of IFT6266
+dataset: &train !obj:contest_dataset.ContestDataset {
+    base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
+    which_set: 'train',
+    start: 0,
+    stop: 3500, # We select only the first 3500 exemples as training set
+    preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
+                  subtract_mean: True
+                  },
+    fit_preprocessor: True,
+    fit_test_preprocessor: True
+},
+
+    # Our model will simply be a MLP with a Tanh layer
+    model: !obj:pylearn2.models.mlp.MLP {
+        layers: [
+                 !obj:pylearn2.models.mlp.Tanh {
+                     layer_name: 'h0',
+                     dim: 500,
+                     sparse_init: 15
+                 },
+                 !obj:pylearn2.models.mlp.Softmax {
+                     layer_name: 'y',
+                     n_classes: 7,
+                     irange: 0.
+                 }
+                ],
+        nvis: 2304
+    },
+
+    # We use SGD as our training algorithm
+    algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
+        batch_size: 100,
+        line_search_mode: 'exhaustive',
+        # What we monitor
+        monitoring_dataset:
+            {
+                'train' : *train ,
+                'valid' : !obj:contest_dataset.ContestDataset {
+                              base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
+                              which_set: 'train',
+                              start: 3500, # Keep the last 1000 exemples as validation set
+                              stop: 4000,
+                              preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
+                                            subtract_mean: True
+                                            },
+                              fit_preprocessor: True,
+                              fit_test_preprocessor: True
+                          }
+                # We don't have labels for the public test set
+            },
+        # The cost function is 
+        cost: !obj:pylearn2.costs.cost.MethodCost {
+                method: 'cost_from_X',
+                supervised: 1
+        },
+        # The termination criteria
+        termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
+            channel_name: "valid_y_misclass"
+        }
+    },
+    extensions: [
+        !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+             channel_name: 'valid_y_misclass',
+             save_path: "preprocessing.pkl"
+        },
+    ]
+}
