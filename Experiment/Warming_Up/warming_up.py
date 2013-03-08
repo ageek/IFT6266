@@ -8,7 +8,7 @@ from Code.CheckDatasetPath import checkDatasetPath
 checkDatasetPath()
 
 # Import yaml file that specifies the model to train
-with open("warming_up_sgd.yaml", "r") as f:
+with open("warming_up_bgd.yaml", "r") as f:
     yamlCode = f.read()
 
 # Training the model

@@ -7,17 +7,18 @@
 !obj:pylearn2.train.Train {
 
     # Our dataset is the contest dataset of IFT6266
-dataset: &train !obj:contest_dataset.ContestDataset {
-    base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
-    which_set: 'train',
-    start: 0,
-    stop: 3500, # We select only the first 3500 exemples as training set
-    preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
-                  subtract_mean: True
-                  },
-    fit_preprocessor: True,
-    fit_test_preprocessor: True
-},
+    dataset: &train !obj:contest_dataset.ContestDataset {
+        base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
+        which_set: 'train',
+        start: 0,
+        stop: 3500, # We select only the first 3500 exemples as training set
+        preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
+                      subtract_mean: True,
+                      std_bias: 0.1
+                      },
+        fit_preprocessor: True,
+        fit_test_preprocessor: True
+    },
 
     # Our model will simply be a MLP with a Tanh layer
     model: !obj:pylearn2.models.mlp.MLP {
@@ -50,7 +51,8 @@ dataset: &train !obj:contest_dataset.ContestDataset {
                               start: 3500, # Keep the last 1000 exemples as validation set
                               stop: 4000,
                               preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
-                                            subtract_mean: True
+                                            subtract_mean: True,
+                                            std_bias: 0.1
                                             },
                               fit_preprocessor: True,
                               fit_test_preprocessor: True
@@ -70,7 +72,7 @@ dataset: &train !obj:contest_dataset.ContestDataset {
     extensions: [
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
              channel_name: 'valid_y_misclass',
-             save_path: "preprocessing.pkl"
+             save_path: "preprocessing_std_bias.pkl"
         },
     ]
 }
