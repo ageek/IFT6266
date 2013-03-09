@@ -68,7 +68,6 @@ def convertDataSetToImages(savePath=None, extension=None):
             break
 
 
-
 def runFaceTracker(imagePath, extension=None):
     if extension is None:
         extension = "png"
