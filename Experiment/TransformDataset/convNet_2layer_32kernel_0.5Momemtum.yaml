@@ -43,7 +43,7 @@
         space_preserving : True,
     },
     model: !obj:pylearn2.models.mlp.MLP {
-        batch_size: 50,
+        batch_size: 100,
         input_space: !obj:pylearn2.space.Conv2DSpace {
             shape: [48, 48],
             num_channels: 1
@@ -64,15 +64,16 @@
                      pool_shape: [4, 4],
                      pool_stride: [3, 3],
                      max_kernel_norm: 1.9365,
-                 } !obj:pylearn2.models.mlp.Softmax {
+                 }, !obj:pylearn2.models.mlp.Softmax {
+                     max_col_norm: 1.9365,
                      layer_name: 'y',
                      n_classes: 7,
-                     irange: 0.
+                     irange: .05
                  }
                 ],
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
-        batch_size: 50,
+        batch_size: 100,
         learning_rate: .01,
         init_momentum: .5,
         monitoring_dataset:
@@ -96,7 +97,7 @@
         termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
             channel_name: "valid_y_misclass",
             #prop_decrease: 0.,
-            #N:
+            N: 15
         }
     },
     extensions:

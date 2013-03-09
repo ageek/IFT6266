@@ -7,7 +7,7 @@ from Code.CheckDatasetPath import checkDatasetPath
 checkDatasetPath()
 
 # Import yaml file that specifies the model to train
-with open("convNet_1layer_32kernel_NoMomemtum.yaml", "r") as f:
+with open("convNet_2layer_32kernel_0.5Momemtum.yaml", "r") as f:
     yamlCode = f.read()
 
 # Training the model

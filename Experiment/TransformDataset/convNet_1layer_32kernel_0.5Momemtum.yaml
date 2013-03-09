@@ -8,7 +8,7 @@
 
 !obj:pylearn2.train.Train {
     dataset: &train !obj:contestTransformerDataset.TransformerDataset {
-        raw : !obj:contest_dataset.ContestDataset {
+        raw : &raw !obj:contest_dataset.ContestDataset {
             which_set: 'train',
 #            base_path: '/Users/Archi/Documents/University/ift6266kaggle/transform/',
             start: 0,
@@ -69,7 +69,7 @@
         init_momentum: .5,
         monitoring_dataset:
             {
-                'train' : *train,
+                'train' : *raw,
                 'valid'  : !obj:contest_dataset.ContestDataset {
                               which_set: 'train',
 #                             base_path: '/Users/Archi/Documents/University/ift6266kaggle/transform/',

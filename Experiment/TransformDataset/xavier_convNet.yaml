@@ -1,21 +1,14 @@
-# Based on the file by Xavier Bouthillier
+# This file is for testing PyLearn2 setup. I should get the same results
 
-# Model :
-#   Conv net 2 layer of rectified linear
-#   Batch size : 50
-#   Preprocessing : GlobalContrastNormalization
-#   0.5 Momemtum
-
+# author: Xavier Bouthillier
 !obj:pylearn2.train.Train {
     dataset: &train !obj:contestTransformerDataset.TransformerDataset {
         raw : !obj:contest_dataset.ContestDataset {
             which_set: 'train',
-#            base_path: '/Users/Archi/Documents/University/ift6266kaggle/transform/',
+#            base_path: '/home/xavier/data/ContestDataset',
             start: 0,
             stop: 3500,
-            preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
-                          subtract_mean: True
-                          },
+            preprocessor : !obj:pylearn2.datasets.preprocessing.Standardize {},
             fit_preprocessor: True,
             fit_test_preprocessor: True,
         },
@@ -43,49 +36,48 @@
         space_preserving : True,
     },
     model: !obj:pylearn2.models.mlp.MLP {
-        batch_size: 50,
+        batch_size: 100,
         input_space: !obj:pylearn2.space.Conv2DSpace {
             shape: [48, 48],
             num_channels: 1
         },
         layers: [ !obj:pylearn2.models.mlp.ConvRectifiedLinear {
                      layer_name: 'h0',
-                     output_channels: 32,
+                     output_channels: 64,
                      irange: .05,
                      kernel_shape: [5, 5],
                      pool_shape: [4, 4],
                      pool_stride: [3, 3],
                      max_kernel_norm: 1.9365,
-                 },!obj:pylearn2.models.mlp.ConvRectifiedLinear {
+                 }, !obj:pylearn2.models.mlp.ConvRectifiedLinear {
                      layer_name: 'h1',
-                     output_channels: 32,
+                     output_channels: 64,
                      irange: .05,
                      kernel_shape: [5, 5],
                      pool_shape: [4, 4],
                      pool_stride: [3, 3],
                      max_kernel_norm: 1.9365,
-                 } !obj:pylearn2.models.mlp.Softmax {
+                 }, !obj:pylearn2.models.mlp.Softmax {
+                     max_col_norm: 1.9365,
                      layer_name: 'y',
                      n_classes: 7,
-                     irange: 0.
+                     irange: 0.5
                  }
                 ],
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
-        batch_size: 50,
-        learning_rate: .01,
+        batch_size: 100,
+        learning_rate: .001,
         init_momentum: .5,
         monitoring_dataset:
             {
                 'train' : *train,
                 'valid'  : !obj:contest_dataset.ContestDataset {
                               which_set: 'train',
-#                             base_path: '/Users/Archi/Documents/University/ift6266kaggle/transform/',
-                              start: 3500,
-                              stop: 4100,
-                              preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
-                                            subtract_mean: True
-                                            },
+#                              base_path: '/home/xavier/data/ContestDataset',
+                              start: 0,
+                              stop: 4178,
+                              preprocessor: !obj:pylearn2.datasets.preprocessing.Standardize { },
                               fit_preprocessor: True
                           }
             },
@@ -95,17 +87,15 @@
             },
         termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
             channel_name: "valid_y_misclass",
-            #prop_decrease: 0.,
-            #N:
+            prop_decrease: 0.,
+            N: 15
         }
     },
     extensions:
-        [
-        !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+        [ !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
              channel_name: 'valid_y_misclass',
-             save_path: "convNet_2layer_32kernel_bgd.pkl"
-        } ,
-         !obj:pylearn2.training_algorithms.sgd.MomentumAdjustor {
+             save_path: "hhuge_conv_best.pkl"
+        }, !obj:pylearn2.training_algorithms.sgd.MomentumAdjustor {
             start: 1,
             saturate: 10,
             final_momentum: .99
