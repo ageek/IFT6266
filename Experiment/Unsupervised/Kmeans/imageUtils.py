@@ -54,3 +54,54 @@ def display_color(M, border=0, bordercolor=None, *imshow_args, **imshow_keyargs)
     imshow_keyargs["interpolation"] = "nearest"
     pylab.imshow(im, *imshow_args, **imshow_keyargs)
     pylab.show()
+
+
+def display_greyscale(M, border=0, bordercolor=None, *imshow_args, **imshow_keyargs):
+    """ Display an array of grayscale (0 .. 255) images.
+
+    M is the matrix in (data,row,column) indexing
+
+    The input array is assumed to have the shape numimages x numpixelsY x numpixelsX
+    """
+    # ToDo Find out why it displays in color !
+    if not bordercolor:
+        bordercolor = 0
+
+    numimages = len(M)
+    M = M.copy()
+
+    # Transform the image to make sure they have uniform scaling
+    for i in range(M.shape[0]):
+        M[i] -= M[i].flatten().min()
+        M[i] /= M[i].flatten().max()
+    height, width = M[0].shape
+
+    # Compute the grid of the final image
+    n0 = numpy.int(numpy.ceil(numpy.sqrt(numimages)))
+    n1 = numpy.int(numpy.ceil(numpy.sqrt(numimages)))
+    im = bordercolor * numpy.ones(
+        ((height + border) * n1 + border, (width + border) * n0 + border), dtype='<f8')
+
+    # Add each image to the grid
+    for i in range(n0):
+        for j in range(n1):
+            if i * n1 + j < numimages:
+                # Compute position in the grid
+                vStart = j * (height + border) + border
+                vEnd = (j + 1) * (height + border) + border
+                hStart = i * (width + border) + border
+                hEnd = (i + 1) * (width + border) + border
+                # Add border to the right
+                imageWithBorder = numpy.concatenate(
+                    (M[i * n1 + j, :, :],
+                     bordercolor * numpy.ones((height, border), dtype='<f8')),
+                    axis=1)
+                # Add border below
+                imageWithBorder = numpy.concatenate(
+                    (imageWithBorder,
+                     bordercolor * numpy.ones((border, width + border), dtype='<f8')),
+                    axis=0)
+                im[vStart:vEnd, hStart:hEnd] = imageWithBorder.astype(dtype='<f8')
+    imshow_keyargs["interpolation"] = "nearest"
+    pylab.imshow(im, *imshow_args, **imshow_keyargs)
+    pylab.show()
