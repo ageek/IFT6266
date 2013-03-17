@@ -22,3 +22,7 @@
 .idea/workspace.xml
 
 *.pyc
+
+*.pkl
+
+.idea
