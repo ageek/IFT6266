@@ -1,0 +1,115 @@
+# Based on the file by Xavier Bouthillier
+
+# Model :
+#   Conv net 1 layer of rectified linear
+#   Batch size : 100
+#   Preprocessing : Standardization
+#   Momemtum : 0.5
+
+!obj:pylearn2.train.Train {
+    dataset: &train !obj:contestTransformerDataset.TransformerDataset {
+        raw : !obj:contest_dataset.ContestDataset {
+            which_set: 'train',
+            base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
+            start: 0,
+            stop: 3500,
+            preprocessor: !obj:pylearn2.datasets.preprocessing.Standardize {},
+            fit_preprocessor: True,
+            fit_test_preprocessor: True,
+        },
+        transformer : !obj:transformer.TransformationPipeline {
+            input_space: !obj:pylearn2.space.Conv2DSpace {
+                shape: [48, 48],
+                num_channels: 1,
+            },
+            transformations: [
+                !obj:transformer.TransformationPool {
+                    p_distribution: [0.4, 0.3, 0.3],
+                    transformations: [
+                        !obj:transformer.GaussianNoise { p: 0.5 },
+                        !obj:transformer.Sharpening { p: 0.5 },
+                        !obj:transformer.Denoising { p: 0.5 }
+                    ],
+                },
+                !obj:transformer.Occlusion {},
+                !obj:transformer.HalfFace {},
+                !obj:transformer.Translation {},
+                !obj:transformer.Scaling {},
+                !obj:transformer.Rotation {},
+                !obj:transformer.Flipping {}
+        ] },
+        space_preserving : True,
+    },
+    model: !obj:pylearn2.models.mlp.MLP {
+        batch_size: 100,
+        input_space: !obj:pylearn2.space.Conv2DSpace {
+            shape: [48, 48],
+            num_channels: 1
+        },
+        layers: [ !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+                     layer_name: 'h0',
+                     output_channels: 32,
+                     irange: .05,
+                     kernel_shape: [5, 5],
+                     pool_shape: [4, 4],
+                     pool_stride: [3, 3],
+                     max_kernel_norm: 1.9365,
+                 },
+                 !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+                    layer_name: 'h1',
+                    output_channels: 32,
+                    irange: .05,
+                    kernel_shape: [5, 5],
+                    pool_shape: [4, 4],
+                    pool_stride: [3, 3],
+                    max_kernel_norm: 1.9365,
+                 }, !obj:pylearn2.models.mlp.Softmax {
+                     layer_name: 'y',
+                     n_classes: 7,
+                     irange: 0.5
+                 }
+                ],
+    },
+    algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
+            batch_size: 100,
+            line_search_mode: 'exhaustive',
+            # What we monitor
+            monitoring_dataset:
+                {
+                    'train' : *train ,
+                    'valid' : !obj:contest_dataset.ContestDataset {
+                                  base_path: '/Users/Archi/Documents/University/IFT6266/ContestDataset',
+                                  which_set: 'train',
+                                  start: 500, # Keep the last 1000 exemples as validation set
+                                  stop: 4100,
+                                  preprocessor: !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
+                                                subtract_mean: True
+                                                },
+                                  fit_preprocessor: True,
+                                  fit_test_preprocessor: True
+                              }
+                    # We don't have labels for the public test set
+                },
+            # The cost function is
+            cost: !obj:pylearn2.costs.cost.MethodCost {
+                    method: 'cost_from_X',
+                    supervised: 1
+            },
+            # The termination criteria
+            termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
+                channel_name: "valid_y_misclass"
+            }
+        },
+    extensions:
+        [
+        !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+             channel_name: 'valid_y_misclass',
+             save_path: "convNet_standard_bgd.pkl"
+        } #,
+         #!obj:pylearn2.training_algorithms.sgd.MomentumAdjustor {
+         #   start: 1,
+         #   saturate: 10,
+         #   final_momentum: .99
+       # }
+    ]
+}
