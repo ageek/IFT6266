@@ -3,36 +3,39 @@ __author__ = 'Vincent Archambault-Bouffard'
 import numpy
 
 
-def canonical_preprocessing(patches, stdConstant=0.001):
+def contrastNormalization(patches, stdConstant=0.001):
     """Does the canonical preprocessing. Patches are row-wise
 
     DC Centering
-    Contrast Normalization
+    Contrast Normalization"""
+
+    patches -= patches.mean(1)[:, None]   # DC CENTERING
+    patches /= patches.std(1)[:, None] + stdConstant  # CONTRAST NORMALIZATION
+    return patches
+
+
+def standardScore(patches, stdConstant=0.001):
+    """Computes the standard scroe. Patches are row-wise
+
     Mean Centering
     Variance Normalization"""
 
-    dcMean = patches.mean(1)  # DC CENTERING
-
-    contrastStd = patches.std(1) + stdConstant  # CONTRAST NORMALIZATION
-
     dataMean = patches.mean(0)  # Data Mean centering
-
     dataStd = patches.std(0) + stdConstant  # Data Normalization
 
-    patches = apply_canonical_preprocessing(patches, dcMean, contrastStd, dataMean, dataStd)
-    return patches, dcMean, contrastStd, dataMean, dataStd
+    patches -= dataMean[None, :]  # Data Mean centering
+    patches /= dataStd[None, :]  # Data Normalization
+
+    patches = apply_standardScore(patches, dataMean, dataStd)
+    return patches, dataMean, dataStd
 
 
-def apply_canonical_preprocessing(patches, dcMean, contrastStd, dataMean, dataStd):
+def apply_standardScore(patches, dataMean, dataStd):
     """Applies the canonical preprocessing. Patches are row-wise"""
 
-    patches -= dcMean[:, None]  # DC CENTERING
-
-    patches /= contrastStd[:, None]  # CONTRAST NORMALIZATION
-
     patches -= dataMean[None, :]  # Data Mean centering
-
     patches /= dataStd[None, :]  # Data Normalization
+
     return patches
 
 
