@@ -1,21 +1,15 @@
 __author__ = "Vincent Archambault-Bouffard"
 
-import pylab
+# This script will train
+
 import numpy
 import patches
-import imageUtils
 import preprocessing
 import kmeans
+import loadDataset
 
-
-def import_dataset():
-    """Imports the dataset"""
-    trainX = pylab.loadtxt("cifar_mini_images_train.txt").reshape(2000, 3, 32, 32).transpose(0, 2, 3, 1)
-    trainY = pylab.loadtxt("cifar_mini_labels_train.txt").reshape(2000, 10)
-    testX = pylab.loadtxt("cifar_mini_images_test.txt").reshape(2000, 3, 32, 32).transpose(0, 2, 3, 1)
-    testY = pylab.loadtxt("cifar_mini_labels_test.txt").reshape(2000, 10)
-
-    return trainX, trainY, testX, testY
+patchSize = 16
+kMeansBatchSize = 1000
 
 
 def unsupervisedTraining(X):
@@ -23,42 +17,56 @@ def unsupervisedTraining(X):
 
     Returns all information needed for training and testing"""
     print "Crop patches"
-    p = numpy.concatenate([patches.crop_patches_color(x, 10, 6) for x in X]).astype(numpy.float64)
+    p = numpy.concatenate([patches.crop_patches_grayscale(x, patchSize, 20) for x in X]).astype(numpy.float64)
     p = p.reshape((p.shape[0], -1))  # Flattens every patch
 
     print "Canonical preprocessing"
-    p, dcMean, contrastStd, dataMean, dataStd = preprocessing.canonical_preprocessing(p)
+    p = preprocessing.contrastNormalization(p)
+    p, dataMean, dataStd = preprocessing.standardScore(p)
 
     print "PCA Whitening"
     whitePatches, projectionMapping, inverseMapping = preprocessing.pca_whitening(p, 0.9)
 
     print "K-means"
-    centroids = kmeans.kmeans(whitePatches, 100, 10)
+    centroids = kmeans.kmeans(whitePatches, 400, 10, batchsize=kMeansBatchSize)
 
-    return dcMean, contrastStd, dataMean, dataStd, projectionMapping, inverseMapping, centroids
+    return dataMean, dataStd, projectionMapping, inverseMapping, centroids
 
 
-if __name__ == "__main__":
-    print "Import dataset"
-    trainX, trainY, testX, testY = import_dataset()
-
-    print "Unsupervised Training"
-    dcMean, contrastStd, dataMean, dataStd, projectionMapping, inverseMapping, centroids = unsupervisedTraining(trainX)
-
-    print "Training classifier"
-    for i, img in enumerate(trainX):
+def applyUnsupervisedTraining(X, dataMean, dataStd, projectionMapping, centroids):
+    features = []
+    print "Input data", X.shape
+    for i, img in enumerate(X):
         if i % 100 == 0:
             print i
 
         # Crop patches
-        p = patches.crop_patches_color(img, 10, 400).astype(numpy.float64)
+        p = patches.crop_patches_grayscale(img, patchSize, 400).astype('float')
         p = p.reshape((p.shape[0], -1))  # Flattens the patch
+        print "After crop", p.shape
 
         # Preprocess with unsupervised data
-        p = preprocessing.apply_canonical_preprocessing(p, dcMean, contrastStd, dataMean, dataStd)
+        p = preprocessing.apply_standardScore(p, dataMean, dataStd)
         p = preprocessing.apply_pca_whitening(p, projectionMapping)
+        print "After whitening", p.shape
 
         # Extract the K-means features
-        features = kmeans.assignTriangle(p, centroids)
+        p = kmeans.assignTriangle(p, centroids)
+        print "After assign ", p.shape
+        p.mean(axis=1)
+        features.append(p)
 
-        # Compute mean features from by quadrants
+    return numpy.concatenate(features)
+
+if __name__ == "__main__":
+    print "Import dataset"
+    trainX, trainY, testX = loadDataset.loadDataset()
+
+    print "Unsupervised Training"
+    dataMean, dataStd, projectionMapping, inverseMapping, centroids = unsupervisedTraining(trainX)
+
+    print "Apply unsupervised training"
+    features = applyUnsupervisedTraining(trainX[:1], dataMean, dataStd, projectionMapping, centroids)
+    print features.sum(axis=1).mean()
+
+    print "Train logistic regression"
