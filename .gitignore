@@ -26,3 +26,7 @@
 *.pkl
 
 .idea
+
+Experiment/TransformDataset/convNet_1.csv
+
+Experiment/TransformDataset/convnet2.csv
