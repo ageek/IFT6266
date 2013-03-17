@@ -191,8 +191,8 @@ if __name__ == "__main__":
     testinputs = numpy.hstack((numpy.random.randn(2,100)-1.0,numpy.random.randn(2,100)+1.0))
     #build and train a model:
     model = Logreg(2,2)
-    #model.train(traininputs,trainlabels,0.001)
-    model.train_cg(traininputs,trainlabels,0.001)
+    model.train(traininputs,trainlabels,0.001,100)
+    #model.train_cg(traininputs,trainlabels,0.001)
     #or use a monte trainer object:
     #from monte.gym import trainer 
     #trainer = trainer.Conjugategradients(model,20)
