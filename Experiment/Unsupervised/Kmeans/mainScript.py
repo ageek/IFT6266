@@ -10,15 +10,16 @@ import kmeans
 import loadDataset
 import logreg
 
-patchSize = 16
+patchSize = 20
 validationSize = 500
 
-kMeansBatchSize = 20
-kMeansIter = 50
-centroidsNumber = 500
+kMeansBatchSize = 100
+kMeansIter = 10
+centroidsNumber = 1000
 
-logIter = 500
-logWeightDecay = 0.0001
+logIter = 100
+logWeightDecay = 0.00001
+
 
 def unsupervisedTraining(X):
     """Unsupervised training using K-means
@@ -36,8 +37,8 @@ def unsupervisedTraining(X):
     whitePatches, projectionMapping, inverseMapping = preprocessing.pca_whitening(p, 0.9)
 
     print "K-means"
-    #centroids = kmeans.kmeans(whitePatches, centroidsNumber, kMeansIter, batchsize=kMeansBatchSize)
-    centroids = kmeans.kmeans_batch(whitePatches, centroidsNumber)
+    centroids = kmeans.kmeans(whitePatches, centroidsNumber, kMeansIter, batchsize=kMeansBatchSize)
+    #centroids = kmeans.kmeans_batch(whitePatches, centroidsNumber)
 
     return dataMean, dataStd, projectionMapping, inverseMapping, centroids
 
@@ -135,12 +136,13 @@ if __name__ == "__main__":
         logWeightDecay
     )
     if os.path.exists(submissionName):
-        
+        os.remove(submissionName)
     f = open(submissionName, 'wb')
     testFeatures = applyUnsupervisedTraining(testX, dataMean, dataStd, projectionMapping, centroids)
     print testFeatures.shape
-    testX = logR.classify(testFeatures.T).T
-    for i, img in enumerate(testFeatures):
+    testClassified = logR.classify(testFeatures.T).T
+    print testClassified.shape
+    for i, img in enumerate(testClassified):
         answer = numpy.argmax(img)
         f.write("{0}\n".format(answer))
 
