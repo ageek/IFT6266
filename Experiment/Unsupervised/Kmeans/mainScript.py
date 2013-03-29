@@ -10,15 +10,15 @@ import kmeans
 import loadDataset
 import logreg
 
-patchSize = 20
+patchSize = 6
 validationSize = 500
 
 kMeansBatchSize = 100
-kMeansIter = 10
+kMeansIter = 30
 centroidsNumber = 1000
 
-logIter = 100
-logWeightDecay = 0.00001
+logIter = 1500
+logWeightDecay = 0.001
 
 
 def unsupervisedTraining(X):
@@ -26,7 +26,7 @@ def unsupervisedTraining(X):
 
     Returns all information needed for training and testing"""
     print "Crop patches"
-    p = numpy.concatenate([patches.crop_patches_grayscale(x, patchSize, 20) for x in X]).astype(numpy.float64)
+    p = numpy.concatenate([patches.crop_patches_grayscale(x, patchSize, 40) for x in X]).astype(numpy.float64)
     p = p.reshape((p.shape[0], -1))  # Flattens every patch
 
     print "Canonical preprocessing"
@@ -51,7 +51,7 @@ def applyUnsupervisedTraining(X, dataMean, dataStd, projectionMapping, centroids
             pass  # print i
 
         # Crop patches
-        p = patches.crop_patches_grayscale(img, patchSize, 20).astype('float')
+        p = patches.crop_patches_grayscale_everywhere(img, patchSize).astype('float')
         p = p.reshape((p.shape[0], -1))  # Flattens the patch
         #print "After crop", p.shape
 
