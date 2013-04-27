@@ -289,7 +289,7 @@ def testModel(model_path):
 def buildingY(folderName):
     avg = np.load("NumpyData/averageKp.npy")
     std = np.load("NumpyData/stdKp.npy")
-    Xtest, _ = loadData.loadFacialKeypointDataset("public_test")
+    Xtest, _ = loadData.loadFacialKeypointDataset("public_test", base_path=rootPath)
     y = np.zeros((Xtest.shape[0], 30))
     valAvg = 0.0
     valCount = 0.0
@@ -332,7 +332,7 @@ def sampleImage(Xtest, folderName, y):
 
 def runExperiment(folderName):
     print "Loading model"
-    loadAndTrainObject(folderName)
+    #loadAndTrainObject(folderName)
 
     print "Building Y"
     Xtest, avg, std, y = buildingY(folderName)
