@@ -33,6 +33,9 @@ Experiment/TransformDataset/convnet2.csv
 
 *.txt
 
+# Ignore csv file (submission file)
+*.csv
+
 # Ignore numpy files
 *.npy
 
