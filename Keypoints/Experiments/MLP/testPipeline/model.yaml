@@ -1,11 +1,10 @@
 
 !obj:pylearn2.train.Train {
-
-    # Our dataset is the contest dataset of IFT6266
-    dataset: &train !obj:keypoints_dataset.FacialKeypointDataset {
+    dataset: &train !obj:keypoint_Dataset.KeypointDataset {
         which_set: 'train',
-        start: 0,
-        stop: 6500 # We select only the first 6500 exemples as training set
+        keypointNumber: {0},
+        start: 0.0,
+        stop: 0.90
     },
 
     # Our model will simply be a MLP with one Tanh layer
@@ -13,16 +12,16 @@
         layers: [
                  !obj:pylearn2.models.mlp.Tanh {
                      layer_name: 'h0',
-                     dim: 500,
+                     dim: 50,
                      sparse_init: 15
                  },
                  !obj:pylearn2.models.mlp.Linear {
                      layer_name: 'y',
-                     dim: 30,
+                     dim: 2,
                      sparse_init: 5
                  }
                 ],
-        nvis: 9216
+        nvis: 2304
     },
 
     # We use SGD as our training algorithm
@@ -33,10 +32,11 @@
         monitoring_dataset:
             {
                 'train' : *train ,
-                'valid' : !obj:keypoints_dataset.FacialKeypointDataset {
+                'valid' : !obj:keypoint_Dataset.KeypointDataset {
                               which_set: 'train',
-                              start: 6500, # Keep the last 500 exemples as validation set
-                              stop: 7049
+                              keypointNumber: {0},
+                              start: 0.90, # Keep the last 500 exemples as validation set
+                              stop: 1.0
                           }
                 # We don't have labels for the public test set
             },
@@ -51,7 +51,7 @@
     extensions: [
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
              channel_name: 'valid_objective',
-             save_path: "test_results.pkl"
+             save_path: "{1}/generic_keypoint_{0}.pkl"
         },
     ]
 }
