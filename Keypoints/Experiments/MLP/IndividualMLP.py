@@ -349,5 +349,5 @@ def runExperiment(folderName):
 
 if __name__ == "__main__":
     #buildKeyPointsDataset()
-    runExperiment("ConvRectifiedLinear")
+    runExperiment("ConvRectifiedLinear2")
     #runExperiment("testPipeline")
