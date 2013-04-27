@@ -10,8 +10,8 @@ from pylearn2.config import yaml_parse
 from pylearn2.utils import serial
 from theano import function
 
-#rootPath = '/data/lisatmp/ift6266h13/ContestDataset/'
-rootPath = '/Users/Archi/Documents/University/IFT6266/IFT6266/Keypoints'
+rootPath = '/data/lisatmp/ift6266h13/ContestDataset/'
+#rootPath = '/Users/Archi/Documents/University/IFT6266/IFT6266/Keypoints'
 
 def drawKeypointsOnImage(img, keyPoints):
     """
@@ -350,5 +350,5 @@ def runExperiment(folderName):
 
 if __name__ == "__main__":
     #buildKeyPointsDataset()
-    #runExperiment("ConvRectifiedLinear2")
-    runExperiment("testPipeline")
+    runExperiment("ConvRectifiedLinear3")
+    #runExperiment("testPipeline")
