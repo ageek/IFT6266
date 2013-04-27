@@ -348,6 +348,6 @@ def runExperiment(folderName):
     sampleImage(Xtest, folderName, y)
 
 if __name__ == "__main__":
-    buildKeyPointsDataset()
+    #buildKeyPointsDataset()
     #runExperiment("ConvRectifiedLinear")
-    #runExperiment("testPipeline")
+    runExperiment("testPipeline")
