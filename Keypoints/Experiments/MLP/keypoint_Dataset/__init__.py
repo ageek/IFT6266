@@ -54,7 +54,7 @@ class KeypointDataset(DenseDesignMatrix):
         del self.test_args['stop']
         del self.test_args['self']
 
-        X, y = loadFromNumpy(base_path, which_set, keypointNumber)
+        X, y = loadFromNumpy(which_set, keypointNumber)
 
         if start is not None:
             assert which_set != 'public_test'
@@ -95,18 +95,18 @@ def fileNames(which_set, kpNumber):
     return X_file, Y_file
 
 
-def loadFromNumpy(base_path, which_set, kpNumber):
+def loadFromNumpy(which_set, kpNumber):
     X_file, Y_file = fileNames(which_set, kpNumber)
     if X_file is None:
         return None, None
 
-    path = os.path.join(base_path, X_file)
+    path = os.path.join(X_file)
     if not os.path.exists(path):
         return None, None
     X = np.load(path)
 
     if Y_file is not None:
-        path = os.path.join(base_path, Y_file)
+        path = os.path.join(Y_file)
         if not os.path.exists(path):
             return None, None
         Y = np.load(path)

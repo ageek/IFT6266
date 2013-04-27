@@ -10,6 +10,8 @@ from pylearn2.config import yaml_parse
 from pylearn2.utils import serial
 from theano import function
 
+rootPath = '/data/lisatmp/ift6266h13/ContestDataset/'
+#rootPath = '/Users/Archi/Documents/University/IFT6266/IFT6266/Keypoints'
 
 def drawKeypointsOnImage(img, keyPoints):
     """
@@ -105,7 +107,7 @@ def splitFullSparse(X, Y):
 
 def makeSubmission(y, out_path):
     submission = []
-    with open('/Users/Archi/Documents/University/IFT6266/IFT6266/Keypoints/submissionFileFormat.csv', 'rb') as cvsTemplate:
+    with open(rootPath+'/submissionFileFormat.csv', 'rb') as cvsTemplate:
         reader = csv.reader(cvsTemplate)
         for row in reader:
             submission.append(row)
@@ -155,28 +157,27 @@ def extract_region(X, kpNumber, avg):
 # Boucle pour chaque keypoint loading model et faire prédiction
 # Make submission !!
 
-def loadTrainObject(folderName):
+def loadAndTrainObject(folderName):
     # Import yaml file that specifies the model to train
     with open("{0}/model.yaml".format(folderName), "r") as f:
         yamlCode = f.read()
-
-    trains = [None] * 15
 
     yamlCode = yamlCode.replace("{1}", folderName)
     for i in range(15):
         modelCode = yamlCode.replace("{0}", str(i))
 
         # Training the model
-        train = yaml_parse.load(modelCode)  # Creates the object from the yaml file
-        trains[i] = train
+        print "Training model {0}".format(i)
+        model = yaml_parse.load(modelCode)  # Creates the object from the yaml file
+        model.main_loop()
 
-    return trains
+    return
 
 
 def buildKeyPointsDataset():
     print "Building keypoint dataset"
-    X, Y = loadData.loadFacialKeypointDataset("train")
-    Xtest, _ = loadData.loadFacialKeypointDataset("public_test")
+    X, Y = loadData.loadFacialKeypointDataset("train", base_path=rootPath)
+    Xtest, _ = loadData.loadFacialKeypointDataset("public_test", base_path=rootPath)
     xFull, yFull, xSparse, ySparse = splitFullSparse(X, Y)
 
     Yaverage = np.average(Y, axis=0)
@@ -284,26 +285,21 @@ def testModel(model_path):
     return y[:m], validationError
 
 
-def trainModels(models):
-    for i, m in enumerate(models):
-        print "Training model {0}".format(i)
-        m.main_loop()
-
 
 def buildingY(folderName):
     avg = np.load("NumpyData/averageKp.npy")
     std = np.load("NumpyData/stdKp.npy")
     Xtest, _ = loadData.loadFacialKeypointDataset("public_test")
     y = np.zeros((Xtest.shape[0], 30))
-    valAvg = 0
-    valCount = 0
+    valAvg = 0.0
+    valCount = 0.0
     for i in range(15):
         print "Test model {0}".format(i)
         y[:, 2 * i:2 * i + 2], valErr = testModel("{1}/generic_keypoint_{0}.pkl".format(i, folderName))
-        valAvg += (3 if i in indexOfAll else 1) * valErr
-        valCount += 3 if i in indexOfAll else 1
-    valAvg /= 1.0 * valCount
-    with open('{0}/valid_{1}'.format(folderName, int(valAvg)), "w") as f:
+        valAvg += (3 if 2*i in indexOfAll else 1) * valErr
+        valCount += 3 if 2*i in indexOfAll else 1
+    valAvg /= valCount
+    with open('{0}/valid_{1}.txt'.format(folderName, int(valAvg)), "w") as f:
         f.write(str(valAvg))
     return Xtest, avg, std, y
 
@@ -336,10 +332,7 @@ def sampleImage(Xtest, folderName, y):
 
 def runExperiment(folderName):
     print "Loading model"
-    #models = loadTrainObject(folderName)
-
-    print "Training"
-    #trainModels(models)
+    #loadAndTrainObject(folderName)
 
     print "Building Y"
     Xtest, avg, std, y = buildingY(folderName)
@@ -356,4 +349,5 @@ def runExperiment(folderName):
 
 if __name__ == "__main__":
     #buildKeyPointsDataset()
+    #runExperiment("ConvRectifiedLinear")
     runExperiment("testPipeline")
