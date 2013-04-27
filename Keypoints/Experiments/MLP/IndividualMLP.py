@@ -332,7 +332,7 @@ def sampleImage(Xtest, folderName, y):
 
 def runExperiment(folderName):
     print "Loading model"
-    #loadAndTrainObject(folderName)
+    loadAndTrainObject(folderName)
 
     print "Building Y"
     Xtest, avg, std, y = buildingY(folderName)
@@ -348,6 +348,6 @@ def runExperiment(folderName):
     sampleImage(Xtest, folderName, y)
 
 if __name__ == "__main__":
-    #buildKeyPointsDataset()
+    buildKeyPointsDataset()
     #runExperiment("ConvRectifiedLinear")
-    runExperiment("testPipeline")
+    #runExperiment("testPipeline")
