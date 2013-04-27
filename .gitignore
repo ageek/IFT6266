@@ -35,6 +35,6 @@ Experiment/TransformDataset/convnet2.csv
 
 
 # Ignore images
-.png
-.jpg
-.jpeg
+*.png
+*.jpg
+*.jpeg
