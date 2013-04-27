@@ -333,7 +333,7 @@ def sampleImage(Xtest, folderName, y):
 
 def runExperiment(folderName):
     print "Loading model"
-    #loadAndTrainObject(folderName)
+    loadAndTrainObject(folderName)
 
     print "Building Y"
     Xtest, avg, std, y = buildingY(folderName)
