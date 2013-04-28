@@ -1,10 +1,9 @@
 
 !obj:pylearn2.train.Train {
-    dataset: &train !obj:keypoint_Dataset.KeypointDataset {
+    dataset: &train !obj:keypoints_MeanCenter_dataset.FacialKeypointMeanCenterDataset {
         which_set: 'train',
-        keypointNumber: {0},
-        start: 0.0,
-        stop: 0.90,
+        start: 0,
+        stop: 6500 # We select only the first 6500 exemples as training set
         preprocessor: !obj:pylearn2.datasets.preprocessing.Standardize {},
         fit_preprocessor: True,
         fit_test_preprocessor: True,
@@ -47,11 +46,10 @@
         monitoring_dataset:
             {
                 'train' : *train ,
-                'valid' : !obj:keypoint_Dataset.KeypointDataset {
+                'valid' : !obj:keypoints_MeanCenter_dataset.FacialKeypointMeanCenterDataset {
                               which_set: 'train',
-                              keypointNumber: {0},
-                              start: 0.70, # Keep the last 500 exemples as validation set
-                              stop: 1.0,
+                              start: 2000,
+                              stop: 4500,
                               preprocessor: !obj:pylearn2.datasets.preprocessing.Standardize {},
                               fit_preprocessor: True,
                               fit_test_preprocessor: True,
@@ -69,7 +67,7 @@
     extensions: [
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
              channel_name: 'valid_objective',
-             save_path: "{1}/generic_keypoint_{0}.pkl"
+             save_path: "MLP/mlp_submission.pkl"
         },
     ]
 }
