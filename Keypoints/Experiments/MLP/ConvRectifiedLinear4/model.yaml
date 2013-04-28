@@ -13,8 +13,8 @@
     model: !obj:pylearn2.models.mlp.MLP {
         layers: [!obj:pylearn2.models.mlp.Tanh {
                      layer_name: 'h0',
-                     dim: 3000,
-                     sparse_init: 500
+                     dim: 1000,
+                     sparse_init: 200
                  },
                  !obj:pylearn2.models.mlp.Linear {
                      layer_name: 'y',
@@ -26,11 +26,11 @@
     },
 
     # We use SGD as our training algorithm
-    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
+    algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
         batch_size: 100,
-        learning_rate: 0.001,
+        #learning_rate: 0.001,
         # What we monitor
-        #line_search_mode: 'exhaustive',
+        line_search_mode: 'exhaustive',
         monitoring_dataset:
             {
                 'train' : *train ,
