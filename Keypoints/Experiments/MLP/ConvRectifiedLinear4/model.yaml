@@ -27,7 +27,7 @@
 
     # We use SGD as our training algorithm
     algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
-        batch_size: 32,
+        batch_size: 100,
         #learning_rate: 0.001,
         # What we monitor
         line_search_mode: 'exhaustive',
