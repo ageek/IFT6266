@@ -1,36 +1,26 @@
 
 !obj:pylearn2.train.Train {
-    dataset: &train !obj:keypoint_Dataset.KeypointDataset {
-        which_set: 'train',
-        keypointNumber: {0},
-        start: 0.0,
-        stop: 0.90,
-        preprocessor: !obj:pylearn2.datasets.preprocessing.Standardize {},
-        fit_preprocessor: True,
-        fit_test_preprocessor: True,
+    dataset: !obj:keypoint_Dataset.KeypointDataset {
+        which_set: 'train'
     },
-
-    model: !obj:pylearn2.models.mlp.MLP {
-        layers: [!obj:pylearn2.models.mlp.Tanh {
-                     layer_name: 'h0',
-                     dim: 1000,
-                     sparse_init: 200
-                 },
-                 !obj:pylearn2.models.mlp.Linear {
-                     layer_name: 'y',
-                     dim: 2,
-                     sparse_init: 1
-                 }
-                ],
-        nvis: 2304
+    "model": !obj:pylearn2.autoencoder.DenoisingAutoencoder {
+        "nvis" : 2304,
+        "nhid" : 4000,
+        "irange" : 0.05,
+        "corruptor": !obj:pylearn2.corruption.BinomialCorruptor {
+            "corruption_level": 0.5,
+        },
+        "act_enc": "tanh",
+        "act_dec": null,    # Linear activation on the decoder side.
     },
 
     # We use SGD as our training algorithm
-    algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
+    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
         batch_size: 100,
-        #learning_rate: 0.001,
+        learning_rate: 1e-3,
         # What we monitor
-        line_search_mode: 'exhaustive',
+        #line_search_mode: 'exhaustive',
+        init_momentum: 0.5,
         monitoring_dataset:
             {
                 'train' : *train ,
@@ -48,6 +38,12 @@
         # The cost function is
         cost: !obj:pylearn2.costs.mlp.missing_target_cost.MissingTargetCost {
         },
+        cost : !obj:pylearn2.costs.cost.SumOfCosts {
+                costs: [
+                        !obj:pylearn2.costs.mlp.missing_target_cost.MissingTargetCost {},
+                        !obj:pylearn2.costs.mlp.WeightDecay { coeffs: [ .0001, .0001, .0001  ] },
+                       ],
+           },
         # The termination criteria
         termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
             channel_name: "valid_objective"

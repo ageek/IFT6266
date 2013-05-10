@@ -1,0 +1,29 @@
+
+!obj:pylearn2.train.Train {
+    dataset: !obj:keypoints_dataset.FacialKeypointDataset &dataset {
+        which_set: 'train'
+    },
+    "model": !obj:pylearn2.models.autoencoder.Autoencoder {
+        "nvis" : 9216,
+        "nhid" : 2304,
+        "irange" : 0.05,
+#        "corruptor": !obj:pylearn2.corruption.BinomialCorruptor {
+#            "corruption_level": 0.5,
+#        },
+        "act_enc": "tanh",
+        "act_dec": null,    # Linear activation on the decoder side.
+    },
+    "algorithm": !obj:pylearn2.training_algorithms.sgd.SGD {
+        "learning_rate" : 1e-4,
+        "batch_size" : 100,
+        "init_momentum" : 0.5,
+        "monitoring_batches" : 5,
+        "monitoring_dataset" : *dataset,
+        "cost" : !obj:pylearn2.costs.autoencoder.MeanSquaredReconstructionError {},
+        "termination_criterion" : !obj:pylearn2.training_algorithms.sgd.EpochCounter {
+            "max_epochs": 20,
+        },
+    },
+    "save_path": "./autoEncoder.pkl",
+    "save_freq": 10
+}

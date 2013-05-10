@@ -11,7 +11,7 @@ from pylearn2.utils import serial
 from theano import function
 
 rootPath = '/data/lisatmp/ift6266h13/ContestDataset/'
-#rootPath = '/Users/Archi/Documents/University/IFT6266/IFT6266/Keypoints'
+rootPath = '/Users/Archi/Documents/University/IFT6266/IFT6266/Keypoints'
 
 def drawKeypointsOnImage(img, keyPoints):
     """
@@ -309,12 +309,12 @@ def limitingY(avg, std, y):
     nbChange = 0
     for idx, line in enumerate(y):
         for i in range(30):
-            if line[i] - avg[i] >= 3 * std[i]:
-                y[idx, i] = avg[i] + 1.5 * std[i]
+            if line[i] - avg[i] >= 2 * std[i]:
+                y[idx, i] = avg[i]
                 #print "Changing {0}th keypoint for {1}. {2}, {3}, {4}".format(i, idx, line[i], avg[i], std[i])
                 nbChange += 1
-            if line[i] - avg[i] <= - 3 * std[i]:
-                y[idx, i] = avg[i] - 1.5 * std[i]
+            if line[i] - avg[i] <= - 2 * std[i]:
+                y[idx, i] = avg[i]
                 #print "Changing {0}th keypoint for {1}. {2}, {3}, {4}".format(i, idx, line[i], avg[i], std[i])
                 nbChange += 1
     print "Changed {0} over {1}".format(nbChange, y.shape[0] * 30)
